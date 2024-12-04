@@ -1,0 +1,25 @@
+spring:
+  r2dbc:
+    password: qwerty7788421
+    url: r2dbc:mysql://localhost:3306/wechatmini?useSSL=false
+    name: wechatmini
+    username: root
+
+  main:
+    allow-circular-references: true
+
+
+
+
+logging:
+  level:
+
+    org.springframework.r2dbc: info
+    org.tattoo1880: info
+
+#redis
+
+
+
+server:
+  port: 8092
