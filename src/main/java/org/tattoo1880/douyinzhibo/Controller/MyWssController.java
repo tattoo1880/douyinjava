@@ -29,14 +29,15 @@ public class MyWssController {
 	@PostMapping("/start_wss")
 	public Mono startMyWs(@RequestBody Map<String,String> map){
 		String url = map.get("url");
-		return wsService.myWsService(url);
+		wsService.myWsService(url);
 		
 		//todo 先立即返回ok,再后台执行wsService.myWsService(url)
 		
-//		return Flux.just("ok").doOnNext(s -> {
-//			wsService.myWsService(url).subscribe();
-//		});
-		
+//
+
+
+		// 立即返回响应
+		return Mono.just("ok");
 		
 		
 	}

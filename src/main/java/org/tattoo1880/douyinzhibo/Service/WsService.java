@@ -1,6 +1,7 @@
 package org.tattoo1880.douyinzhibo.Service;
 
 
+import org.springframework.scheduling.annotation.Async;
 import org.tattoo1880.douyinzhibo.Compents.GetWssUrl;
 import org.tattoo1880.douyinzhibo.Compents.WssUtil;
 import org.springframework.stereotype.Service;
@@ -18,14 +19,11 @@ public class WsService {
 		this.wssUtil = wssUtil;
 		this.getWssUrl = getWssUrl;
 	}
-	
-	
-	public Mono myWsService(String url){
+	@Async
+	public void myWsService(String url){
 		String realWssUrl = getWssUrl.getWssUrl(url);
-		return Mono.create(sink -> {
-			wssUtil.wssconnect(url,realWssUrl);
-		});
-		
+		wssUtil.wssconnect(url,realWssUrl);
+
 	}
 	
 }

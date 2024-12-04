@@ -32,6 +32,8 @@ public class GetWssUrl {
 		Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
 				.setChannel("chrome") // 必须明确使用 Chrome
 				.setHeadless(false)   // 设置为非无头模式
+				//！设置一些参数
+						.setArgs(List.of("--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-software-rasterizer"))
 				.setExecutablePath(Paths.get(chromePath)) // 指定本地 Chrome 路径
 		);
 		BrowserContext context = browser.newContext();
