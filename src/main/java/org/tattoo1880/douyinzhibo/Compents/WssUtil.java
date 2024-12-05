@@ -5,13 +5,21 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.ByteString;
-import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Component;
+import org.tattoo1880.douyinzhibo.Entities.TUser;
+import reactor.core.publisher.Mono;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -20,6 +28,9 @@ import java.util.zip.GZIPInputStream;
 @Slf4j
 public class WssUtil {
 	
+	
+	@Autowired
+	R2dbcEntityTemplate r2dbcEntityTemplate;
 	
 	
 
@@ -44,6 +55,15 @@ public class WssUtil {
 			@Override
 			public void onOpen(WebSocket webSocket, Response response) {
 				System.out.println("Opened connection:" + response.message());
+				
+				//! todo 设置一个定时任务10分钟后自动关闭
+				Executors.newSingleThreadScheduledExecutor().schedule(
+						() -> {
+							webSocket.close(1000,"close");
+						},
+						600,
+						java.util.concurrent.TimeUnit.SECONDS
+				);
 			}
 			
 			@Override
@@ -90,8 +110,48 @@ public class WssUtil {
 								chatMessage.getUser().getId(),
 								chatMessage.getUser().getShotId(),
 								chatMessage.getContent());
-//						System.out.println(info);
+						System.out.println(info);
 						log.info(info);
+						
+						String uid = String.valueOf(chatMessage.getUser().getId());
+						String shortId = String.valueOf(chatMessage.getUser().getShotId());
+						String nickname = chatMessage.getUser().getNickName();
+						
+						TUser user = new TUser();
+						user.setUid(uid);
+						user.setShortId(shortId);
+						user.setNickname(nickname);
+						
+						r2dbcEntityTemplate.select(TUser.class)
+								.matching(Query.query(Criteria.where("uid").is(uid)))
+								.first()
+								.flatMap(
+										(tUser) -> {
+											log.debug("{}已经存在",uid);
+											return Mono.just(tUser);
+										}
+								
+								)
+								.switchIfEmpty(
+										r2dbcEntityTemplate.insert(user)
+												.then(Mono.just(user))
+								)
+								
+								
+								
+								.doOnSuccess(
+										(void1) -> {
+											log.info("insert success");
+										}
+								)
+								.doOnError(
+										(throwable) -> {
+											log.error("insert error",throwable);
+										}
+								)
+								.subscribe();
+						
+						
 					}
 					
 					
@@ -122,14 +182,16 @@ public class WssUtil {
 		WebSocket webSocket = client.newWebSocket(request, listener);
 		
 		
-		{
-			try {
-				Thread.sleep(1000000);
-			} catch (InterruptedException e) {
-				System.out.println("test end");
-				throw new RuntimeException(e);
-			}
-		}
+		
+		
+//		{
+//			try {
+//				Thread.sleep(1000000);
+//			} catch (InterruptedException e) {
+//				System.out.println("test end");
+//				throw new RuntimeException(e);
+//			}
+//		}
 		
 	}
 	

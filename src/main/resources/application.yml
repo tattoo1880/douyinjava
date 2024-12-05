@@ -1,9 +1,16 @@
 spring:
   r2dbc:
     password: qwerty7788421
-    url: r2dbc:mysql://localhost:3306/wechatmini?useSSL=false
-    name: wechatmini
+    url: r2dbc:mysql://localhost:3306/douyinws?useSSL=false
+    name: douyinws
     username: root
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
 
   main:
     allow-circular-references: true
@@ -13,9 +20,10 @@ spring:
 
 logging:
   level:
-
-    org.springframework.r2dbc: info
+    root: info
+    org.springframework.r2dbc: debug
     org.tattoo1880: info
+
 
 #redis
 

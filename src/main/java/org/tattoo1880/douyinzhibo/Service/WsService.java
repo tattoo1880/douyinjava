@@ -1,9 +1,12 @@
 package org.tattoo1880.douyinzhibo.Service;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.tattoo1880.douyinzhibo.Compents.GetWssUrl;
 import org.tattoo1880.douyinzhibo.Compents.WssUtil;
 import org.springframework.stereotype.Service;
+import org.tattoo1880.douyinzhibo.Entities.TUser;
+import org.tattoo1880.douyinzhibo.Repsitories.UserRepsitory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +22,8 @@ public class WsService {
 		this.getWssUrl = getWssUrl;
 	}
 	
+	@Autowired
+	UserRepsitory userRepsitory;
 	
 	public Mono myWsService(String url){
 		String realWssUrl = getWssUrl.getWssUrl(url);
@@ -28,4 +33,10 @@ public class WsService {
 		
 	}
 	
+	
+	
+	
+	public Flux<TUser> findAll(){
+		return userRepsitory.findAll();
+	}
 }
