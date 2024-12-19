@@ -1,6 +1,9 @@
 package org.tattoo1880.douyinzhibo.Service;
 
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -19,15 +22,25 @@ public class RoomConsumer {
 
 	@RabbitListener(queues = "zbroom")
 	public void processMessage(String room) {
-//		log.info("Received: " + room);
-		
-		String roomid = JsonParser.parseString(room).getAsJsonObject().get("roomurl").getAsString();
-		log.info("Received: " + roomid);
-		
-		wsService.myWsService(roomid).subscribe();
-		
-		
-		
-		
+		try {
+			// 解析 room 字符串为 JsonElement
+			JsonObject jsonObject = JsonParser.parseString(room).getAsJsonObject();
+
+			// 检查 "roomurl" 是否存在并且不为 null
+			JsonElement roomUrlElement = jsonObject.get("roomurl");
+			if (roomUrlElement != null && !roomUrlElement.isJsonNull()) {
+				String roomid = roomUrlElement.getAsString();
+				log.info("Received roomid: " + roomid);
+
+				// 调用 WebSocket 服务
+				wsService.myWsService(roomid).subscribe();
+			} else {
+				log.warn("No valid 'roomurl' found in the message.");
+			}
+		} catch (JsonParseException e) {
+			log.error("Invalid JSON format received: " + room, e);
+		} catch (Exception e) {
+			log.error("Error processing message: " + room, e);
+		}
 	}
 }

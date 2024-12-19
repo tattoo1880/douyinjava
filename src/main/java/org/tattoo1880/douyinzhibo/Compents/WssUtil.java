@@ -10,6 +10,7 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Component;
+import org.tattoo1880.douyinzhibo.Entities.TContent;
 import org.tattoo1880.douyinzhibo.Entities.TUser;
 import reactor.core.publisher.Mono;
 
@@ -38,7 +39,7 @@ public class WssUtil {
 		
 		Map<String, String> roomInfo = new WssUtil().getRoomInfo(url);
 		String ttwid = roomInfo.get("ttwid");
-		String roomid = roomInfo.get("roomid");
+		String roomid = roomInfo.get("roomId");
 		
 		OkHttpClient client = new OkHttpClient();
 		
@@ -116,11 +117,34 @@ public class WssUtil {
 						String uid = String.valueOf(chatMessage.getUser().getId());
 						String shortId = String.valueOf(chatMessage.getUser().getShotId());
 						String nickname = chatMessage.getUser().getNickName();
+
+						TContent tContent = new TContent();
+						tContent.setUid(uid);
+						tContent.setContent(chatMessage.getContent());
+						tContent.setRoomId(roomid);
+						tContent.setNickname(nickname);
+
+
 						
 						TUser user = new TUser();
 						user.setUid(uid);
 						user.setShortId(shortId);
 						user.setNickname(nickname);
+
+
+						//? 保存到数据库
+						r2dbcEntityTemplate.insert(tContent)
+								.doOnSuccess(
+										(void1) -> {
+											log.info("insert success");
+										}
+								)
+								.doOnError(
+										(throwable) -> {
+											log.error("insert error",throwable);
+										}
+								)
+								.subscribe();
 						
 						r2dbcEntityTemplate.select(TUser.class)
 								.matching(Query.query(Criteria.where("uid").is(uid)))
