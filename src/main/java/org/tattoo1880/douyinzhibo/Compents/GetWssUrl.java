@@ -62,7 +62,7 @@ public class GetWssUrl {
 		
 		// 等待一段时间以确保页面加载并可能触发 WebSocket 请求
 		try {
-			Thread.sleep(15000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 //			throw new RuntimeException(e);
 			log.error("error",e);

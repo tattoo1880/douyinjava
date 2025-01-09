@@ -5,6 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.ByteString;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
@@ -19,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,14 +30,25 @@ import java.util.zip.GZIPInputStream;
 public class WssUtil {
 	
 	
+	
 	@Autowired
 	R2dbcEntityTemplate r2dbcEntityTemplate;
+	
+	private final RabbitTemplate rabbitTemplate;
+	
+	
+	public WssUtil(RabbitTemplate rabbitTemplate) {
+		this.rabbitTemplate = rabbitTemplate;
+	}
+	
+	
+	
 	
 	
 
 	public void wssconnect(String url,String wssUrl) {
 		
-		Map<String, String> roomInfo = new WssUtil().getRoomInfo(url);
+		Map<String, String> roomInfo = new WssUtil(rabbitTemplate).getRoomInfo(url);
 		String ttwid = roomInfo.get("ttwid");
 		String roomid = roomInfo.get("roomId");
 		
@@ -130,7 +141,9 @@ public class WssUtil {
 						user.setUid(uid);
 						user.setShortId(shortId);
 						user.setNickname(nickname);
-
+						
+						//! 发送消息
+						rabbitTemplate.convertAndSend("wssend",info);
 
 						//? 保存到数据库
 						r2dbcEntityTemplate.insert(tContent)
