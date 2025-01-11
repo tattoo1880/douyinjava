@@ -120,11 +120,29 @@ public class WssUtil {
 							if(item.getMethod().equals("WebcastGiftMessage")) {
 								System.out.println("礼物消息");
 								Douyin.GiftMessage giftMessage = Douyin.GiftMessage.parseFrom(item.getPayload());
+
+								Douyin.User giftuser = giftMessage.getUser();
+								String usernickname = giftuser.getNickName();
+								long id = giftuser.getId();
+								Douyin.GiftStruct gift = giftMessage.getGift();
+								Douyin.Image icon = gift.getIcon();
+								String openWebUrl = icon.getOpenWebUrl();
+								long comboCount = giftMessage.getComboCount();
+
+								System.out.println(usernickname + "-- Id:" + id + "送出了" + openWebUrl + "*" + comboCount);
+
+
+
+
 								System.out.println(giftMessage);
 
 							} else if (item.getMethod().equals("WebcastMemberMessage")) {
 								Douyin.MemberMessage memberMessage = Douyin.MemberMessage.parseFrom(item.getPayload());
 								System.out.println(memberMessage);
+
+								String nickName = memberMessage.getUser()
+								                               .getNickName();
+								System.out.println(nickName + "进入了房间");
 							}
 							continue;
 						}
