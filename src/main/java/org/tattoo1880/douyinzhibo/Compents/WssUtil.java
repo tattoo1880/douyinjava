@@ -113,8 +113,24 @@ public class WssUtil {
 					
 					for (Douyin.Message item : response.getMessagesList()) {
 						if (!item.getMethod().equals("WebcastChatMessage")) {
+							System.out.println("====");
+							System.out.println(item.getMethod());
+							System.out.println("====");
+
+							if(item.getMethod().equals("WebcastGiftMessage")) {
+								System.out.println("礼物消息");
+								Douyin.GiftMessage giftMessage = Douyin.GiftMessage.parseFrom(item.getPayload());
+								System.out.println(giftMessage);
+
+							} else if (item.getMethod().equals("WebcastMemberMessage")) {
+								Douyin.MemberMessage memberMessage = Douyin.MemberMessage.parseFrom(item.getPayload());
+								System.out.println(memberMessage);
+							}
 							continue;
 						}
+
+
+
 						
 						Douyin.ChatMessage chatMessage = Douyin.ChatMessage.parseFrom(item.getPayload());
 						String info = String.format("【%s -- %s -- %s】%s",

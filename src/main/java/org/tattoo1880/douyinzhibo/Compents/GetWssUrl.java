@@ -2,7 +2,6 @@ package org.tattoo1880.douyinzhibo.Compents;
 
 
 import com.microsoft.playwright.*;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,7 +50,7 @@ public class GetWssUrl {
 		
 		
 		// 打开页面
-		page.navigate(url,new Page.NavigateOptions().setTimeout(120000));
+		page.navigate(url,new Page.NavigateOptions().setTimeout(300000));
 		
 		
 		
