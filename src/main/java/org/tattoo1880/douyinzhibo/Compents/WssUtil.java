@@ -1,6 +1,7 @@
 package org.tattoo1880.douyinzhibo.Compents;
 
 
+import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -11,8 +12,7 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Component;
-import org.tattoo1880.douyinzhibo.Entities.TContent;
-import org.tattoo1880.douyinzhibo.Entities.TUser;
+import org.tattoo1880.douyinzhibo.Entities.*;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
@@ -113,9 +113,9 @@ public class WssUtil {
 					
 					for (Douyin.Message item : response.getMessagesList()) {
 						if (!item.getMethod().equals("WebcastChatMessage")) {
-							System.out.println("====");
-							System.out.println(item.getMethod());
-							System.out.println("====");
+//							System.out.println("====");
+//							System.out.println(item.getMethod());
+//							System.out.println("====");
 
 							if(item.getMethod().equals("WebcastGiftMessage")) {
 								System.out.println("礼物消息");
@@ -124,25 +124,41 @@ public class WssUtil {
 								Douyin.User giftuser = giftMessage.getUser();
 								String usernickname = giftuser.getNickName();
 								long id = giftuser.getId();
-								Douyin.GiftStruct gift = giftMessage.getGift();
-								Douyin.Image icon = gift.getIcon();
-								String openWebUrl = icon.getOpenWebUrl();
+								String iconuri = giftMessage.getGift().getImage().getUrlListList(0);
 								long comboCount = giftMessage.getComboCount();
 
-								System.out.println(usernickname + "-- Id:" + id + "送出了" + openWebUrl + "*" + comboCount);
+//								System.out.println("=====");
+//								System.out.println(giftMessage.getGift().getImage().getUrlListList(0));
+//								System.out.println("=====");
+
+								System.out.println(usernickname + "(Id:" + id + ") 送出了 " + iconuri + "*" + comboCount);
+
+								//todo
+								Gift gift1 = new Gift("gift",usernickname,String.valueOf(id),iconuri,String.valueOf(comboCount));
+								Gson gson = new Gson();
+								String giftMessageJson = gson.toJson(gift1);
+								log.info("用户{}送出了{}*{}",usernickname,iconuri,comboCount);
+								rabbitTemplate.convertAndSend("wssend",giftMessageJson);
 
 
 
 
-								System.out.println(giftMessage);
+//								System.out.println(giftMessage);
 
 							} else if (item.getMethod().equals("WebcastMemberMessage")) {
 								Douyin.MemberMessage memberMessage = Douyin.MemberMessage.parseFrom(item.getPayload());
-								System.out.println(memberMessage);
 
 								String nickName = memberMessage.getUser()
 								                               .getNickName();
-								System.out.println(nickName + "进入了房间");
+								String id = String.valueOf(memberMessage.getUser()
+								                                     .getId());
+								EnterRoom enterRoom = new EnterRoom("enter",nickName,id);
+								Gson gson = new Gson();
+								String enterRoomJson = gson.toJson(enterRoom);
+								log.info("用户{}进入房间",nickName);
+								rabbitTemplate.convertAndSend("wssend",enterRoomJson);
+
+
 							}
 							continue;
 						}
@@ -156,7 +172,6 @@ public class WssUtil {
 								chatMessage.getUser().getId(),
 								chatMessage.getUser().getShotId(),
 								chatMessage.getContent());
-						System.out.println(info);
 						log.info(info);
 						
 						String uid = String.valueOf(chatMessage.getUser().getId());
@@ -177,7 +192,11 @@ public class WssUtil {
 						user.setNickname(nickname);
 						
 						//! 发送消息
-						rabbitTemplate.convertAndSend("wssend",info);
+//						rabbitTemplate.convertAndSend("wssend",info);
+						ChatMessage chatMessage1 = new ChatMessage("chat",nickname,uid,chatMessage.getContent());
+						Gson gson = new Gson();
+						String chatMessageJson = gson.toJson(chatMessage1);
+						rabbitTemplate.convertAndSend("wssend",chatMessageJson);
 
 						//? 保存到数据库
 						r2dbcEntityTemplate.insert(tContent)
