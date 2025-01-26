@@ -140,10 +140,7 @@ public class WssUtil {
 								log.info("用户{}送出了{}*{}",usernickname,iconuri,comboCount);
 								rabbitTemplate.convertAndSend("wssend",giftMessageJson);
 
-
-
-
-//								System.out.println(giftMessage);
+//							System.out.println(giftMessage);
 
 							} else if (item.getMethod().equals("WebcastMemberMessage")) {
 								Douyin.MemberMessage memberMessage = Douyin.MemberMessage.parseFrom(item.getPayload());

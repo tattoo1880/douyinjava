@@ -50,6 +50,9 @@ message User {
     uint32 Level = 6;
     uint64 Birthday = 7;
     string Telephone = 8;
+    Image AvatarThumb = 9;
+    Image AvatarMedium = 10;
+    Image AvatarLarge = 11;
     string city = 14;
 }
 
