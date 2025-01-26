@@ -121,7 +121,18 @@ public class WssUtil {
 								System.out.println("礼物消息");
 								Douyin.GiftMessage giftMessage = Douyin.GiftMessage.parseFrom(item.getPayload());
 
+
+
 								Douyin.User giftuser = giftMessage.getUser();
+
+								String avatorImageUrl = giftuser.getAvatarThumb()
+								                             .getUrlListList(0);
+//								System.out.println("===");
+//								System.out.println(avatarThumb);
+//								System.out.println("===");
+
+
+
 								String usernickname = giftuser.getNickName();
 								long id = giftuser.getId();
 								String iconuri = giftMessage.getGift().getImage().getUrlListList(0);
@@ -134,7 +145,7 @@ public class WssUtil {
 								System.out.println(usernickname + "(Id:" + id + ") 送出了 " + iconuri + "*" + comboCount);
 
 								//todo
-								Gift gift1 = new Gift("gift",usernickname,String.valueOf(id),iconuri,String.valueOf(comboCount));
+								Gift gift1 = new Gift("gift",usernickname,avatorImageUrl,String.valueOf(id),iconuri,String.valueOf(comboCount));
 								Gson gson = new Gson();
 								String giftMessageJson = gson.toJson(gift1);
 								log.info("用户{}送出了{}*{}",usernickname,iconuri,comboCount);
@@ -149,7 +160,11 @@ public class WssUtil {
 								                               .getNickName();
 								String id = String.valueOf(memberMessage.getUser()
 								                                     .getId());
-								EnterRoom enterRoom = new EnterRoom("enter",nickName,id);
+								String avatorImageUrl = memberMessage.getUser().getAvatarThumb()
+								                                     .getUrlListList(0);
+
+
+								EnterRoom enterRoom = new EnterRoom("enter",nickName,id,avatorImageUrl);
 								Gson gson = new Gson();
 								String enterRoomJson = gson.toJson(enterRoom);
 								log.info("用户{}进入房间",nickName);

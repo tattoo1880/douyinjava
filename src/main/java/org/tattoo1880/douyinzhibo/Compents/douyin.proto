@@ -1,6 +1,8 @@
 syntax = "proto3";
 
 
+
+
 message PushFrame {
     uint64 SeqID = 1;
     uint64 LogID = 2;

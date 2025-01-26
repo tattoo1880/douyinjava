@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public class Gift {
     String Type;
     String UserName;
+    String UserAvatar;
     String UserId;
     String GiftUrl;
     String count;

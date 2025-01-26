@@ -12,4 +12,5 @@ public class EnterRoom {
     String Type;
     String UserName;
     String UserId;
+    String UserAvatar;
 }
